@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Calculator</title>
+</head>
+<body>
+    <div class="calculator">
+        
+        <input type="text" id="display" value="0" readonly />
+        <div class="btn special" id="mode-toggle"> 
+            <button class="no-background disabled">Rad</button> | <button class="no-background">Deg</button> 
+        </div>
+        <button class="btn special" onclick="buttonClicked(',')">,</button>
+        <button class="btn special" onclick="buttonClicked('(')">(</button>
+        <button class="btn special" onclick="buttonClicked(')')">)</button>
+    
+        <button class="btn special" onclick="buttonClicked('inv(')">Inv</button>
+        <button class="btn" onclick="buttonClicked('sin')">sin</button>
+        <button class="btn" onclick="buttonClicked('ln')">ln</button>
+        <button class="btn" onclick="buttonClicked('7')">7</button>
+        <button class="btn" onclick="buttonClicked('8')">8</button>
+        <button class="btn" onclick="buttonClicked('9')">9</button>
+    
+        <button class="btn special" onclick="buttonClicked('π')">π</button>
+        <button class="btn" onclick="buttonClicked('cos')">cos</button>
+        <button class="btn" onclick="buttonClicked('log')">log</button>
+        <button class="btn" onclick="buttonClicked('4')">4</button>
+        <button class="btn" onclick="buttonClicked('5')">5</button>
+        <button class="btn" onclick="buttonClicked('6')">6</button>
+    
+        <button class="btn special" onclick="buttonClicked('e')">e</button>
+        <button class="btn" onclick="buttonClicked('tan')">tan</button>
+        <button class="btn" onclick="buttonClicked('fact')">fact</button>
+        <button class="btn" onclick="buttonClicked('1')">1</button>
+        <button class="btn" onclick="buttonClicked('2')">2</button>
+        <button class="btn" onclick="buttonClicked('3')">3</button>
+    
+        <button class="btn special" onclick="buttonClicked('Ans')">Ans</button>
+        <button class="btn" onclick="buttonClicked('pow')">pow</button>
+        <button class="btn" onclick="buttonClicked('root')">root</button>
+        <button class="btn" onclick="buttonClicked('0')">0</button>
+        <button class="btn" onclick="buttonClicked('.')">.</button>
+        <button class="btn" onclick="backSpace()">⌫</button>
+
+        <button class="btn special" onclick="clearInput()">AC</button>
+
+        <button class="btn special" onclick="buttonClicked('+')">+</button>
+        <button class="btn special" onclick="buttonClicked('-')">-</button>
+        <button class="btn special" onclick="buttonClicked('×')">×</button>
+        <button class="btn special" onclick="buttonClicked('÷')">÷</button>
+        <button class="btn equal" onclick="equals()">=</button>
+        <button class="btn equal">%</button>
+        
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
