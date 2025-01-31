@@ -1,13 +1,15 @@
 
 let inputArray = [];
 const invalidClosingBracket = ["(", ".", "+", "-", "×", "÷", ","];
-const invalidAdjacentSymbol = [".", "+", "-", "×", "÷", ")", , ","];
+const operators = ["!", "", "^", "+", "-", "×", "÷", "√"]
+const invalidAdjacentSymbol = [".", "+", "-", "×", "÷", ")"];
 const functions = ["cos", "sin", "ln", "tan", "log", "pow", "root", "fact", "inv"];
 const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
+const constants = []
 let answer = 0;
 let bracketOpened = 0;
 let inRadians = false;
-let typeOfFunction = [] // 2 represents 2 args 1 for 1 arg 0 arg normal brackets
+let typeOfFunction = []
 let recoveredFunctions = []
 
 let isFloat = []
@@ -18,12 +20,12 @@ function buttonClicked(input){
     let length = inputArray.length;
     let adjacent = inputArray[length -1];
     if (invalidAdjacentSymbol.includes(input) && invalidClosingBracket.includes(adjacent)){
-        if ((!(adjacent==="," && input==="(")) || (!(adjacent===")" && input===","))) return; 
+        if ((!(adjacent==="," && input==="(")) || (!(adjacent===")" && input===","))) return; else {} 
     }
 
     if (input === ")"){
-        if (bracketOpened < 1) return;
-        if (typeOfFunction[typeOfFunction.length -1] === 2) return;
+        if (bracketOpened < 1) return; else {}
+        if (typeOfFunction[typeOfFunction.length -1] === 2) return; else {}
         if (recoveredFunctions[recoveredFunctions.length -1] < 2) recoveredFunctions.push(typeOfFunction[typeOfFunction.length -1]);
         typeOfFunction.pop(); 
         bracketOpened--;
@@ -34,8 +36,8 @@ function buttonClicked(input){
     }
 
     else if (input === ",") {
-        if (typeOfFunction.length < 1) return;
-        if (typeOfFunction[typeOfFunction.length -1] <= 1) return;
+        if (typeOfFunction.length < 1) return; else {}
+        if (typeOfFunction[typeOfFunction.length -1] <= 1) return; else {}
         typeOfFunction[typeOfFunction.length -1]--;
         recoveredFunctions.push(2);
     }
@@ -44,7 +46,7 @@ function buttonClicked(input){
     //     isFloat = false;
     // }
 
-    // if (input == "." && isFloat) return; 
+    // if (input == "." && isFloat) return; else {} 
     // else if (input == ".") isFloat = true;
 
     inputArray.push(input);
@@ -222,11 +224,79 @@ function solve(parsedArray) {
     return evaluate(stack);
 }
 
-function equals() {
+function parse(){
+    let parsedInput1stInteration = []
+    let curr, prev;
+
+    while (inputArray.length > 0){
+        let curr = inputArray.pop();
+        if (prev === "(") {
+            if (curr === ")" || numbers.includes(curr) || functions.includes(curr) || constants.includes(curr)) parsedInput.push("×"); else {}
+        } else if (curr === ")") {
+            if (numbers.includes(prev) || functions.includes(prev) || constants.includes(prev)) parsedInput.push("×"); else {}
+        }
+        parsedInput1stInteration = [curr, ...parsedInput1stInteration];
+        prev = curr;
+    }
+
+    let parsedInput2ndInteration = []
+    while (parsedInput1stInteration.length > 0){
+        let curr = parsedInput1stInteration.pop();
+        if (curr === "!"){
+            parsedInput2ndInteration = ["(", ...parsedInput2ndInteration];
+            curr = parsedInput1stInteration.pop();
+            while (parsedInput1stInteration.length > 0 && !operators.includes(curr)){
+                parsedInput2ndInteration = [curr, ...parsedInput2ndInteration];
+                curr = parsedInput1stInteration.pop();
+            }
+            if (parsedInput1stInteration.length === 0) break;
+            parsedInput2ndInteration = [curr, "fact", "(", ...parsedInput2ndInteration];
+        }
+        else {
+            parsedInput2ndInteration = [curr, ...parsedInput2ndInteration];
+        }
+    }
+
+    let parsedInput3rdInteration = []
+    let lastOperationIndex = -1;
+    let i = -1;
+    while (parsedInput2ndInteration.length > 0){
+        let curr = parsedInput2ndInteration.pop();
+
+        if (curr === "^" || curr === "√"){
+            let word;
+            if (curr === "^") word = "pow"; else word = "root";
+            if (lastOperationIndex > -1) parsedInput3rdInteration = [",", ...parsedInput3rdInteration.splice(0, lastOperationIndex)];
+            i++;
+
+            curr = parsedInput2ndInteration.pop();
+
+            while (parsedInput2ndInteration.length > 0 && !operators.includes(curr)){
+                parsedInput3rdInteration = [curr, ...parsedInput3rdInteration];
+                i++;
+                curr = parsedInput2ndInteration.pop();
+
+            }
+            if (parsedInput2ndInteration.length === 0) break;
+            parsedInput3rdInteration = [curr, word, "(", ...parsedInput3rdInteration];
+            i+=3;
+        }
+        
+        else {
+            parsedInput3rdInteration = [curr, ...parsedInput3rdInteration];
+            i++;
+            if (operators.includes(curr)) lastOperationIndex = i; 
+        }
+    }
+
+
+}
+
+function calculate() {
     const parsedArray = [];
     let number = "";
 
-    for (const i of inputArray) {
+    for (const i of parsedArray) {
         if (numbers.includes(i)) {
             number += i;
             continue;
@@ -268,7 +338,7 @@ function equals() {
 
     const result = solve(parsedArray);
 
-    const expression = inputArray.join("");
+    const expression = parsedArray.join("");
     answer = result;
     clearInput();
 
