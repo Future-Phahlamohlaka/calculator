@@ -1,0 +1,6 @@
+if (curr === "(") {
+    if (prev === ")" || numbers.includes(prev) || constants.includes(prev)) parsedInput1stInteration.push("×"); else {}
+} else if (prev === ")") {
+    if (numbers.includes(curr) || functions.includes(curr) || constants.includes(curr)) parsedInput1stInteration.push("×"); else {}
+}
+else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stInteration.push("×"); else {}

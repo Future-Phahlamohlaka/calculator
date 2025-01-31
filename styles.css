@@ -1,11 +1,10 @@
-body{
+body {
     font-family: "Poppins", serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
-
 
 .calculator {
     display: grid;
@@ -37,7 +36,6 @@ body{
     grid-column: span 2;
     padding: 10px;
     border-radius: 8px;
-
 }
 
 .no-background {
@@ -50,7 +48,7 @@ body{
 }
 
 .btn {
-    background: #e9f0fa;
+    background: #f3e8ff;
     border: none;
     padding: 15px;
     font-size: 1.2em;
@@ -60,30 +58,30 @@ body{
 }
 
 .btn:hover {
-    background: #d8e5f3;
+    background: #e0cffb;
 }
 
 .btn.special {
-    background: #d4e2ff;
+    background: #d9c4ff;
 }
 
 .btn.special:hover {
-    background: #c1d5ff;
+    background: #c7aaff;
 }
 
 .btn.equal {
-    background: #2d68f2;
+    background: #8a2be2;
     color: white;
 }
 
 .btn.equal:hover {
-    background: #2556c8;
+    background: #7b1fa2;
 }
 
 .btn.ac {
-    background: #f6a5a5;
+    background: #e6b3ff;
 }
 
 .btn.ac:hover {
-    background: #f48b8b;
+    background: #d994ff;
 }
