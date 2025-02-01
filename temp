@@ -1,6 +1,93 @@
-if (curr === "(") {
-    if (prev === ")" || numbers.includes(prev) || constants.includes(prev)) parsedInput1stInteration.push("×"); else {}
-} else if (prev === ")") {
-    if (numbers.includes(curr) || functions.includes(curr) || constants.includes(curr)) parsedInput1stInteration.push("×"); else {}
+function parse(){
+    let copyOfInputArray = [...inputArray];
+    let parsedInput1stInteration = []
+    let curr, prev;
+
+    if (copyOfInputArray.length === 0) {
+        document.getElementById('display').value = result;
+        return;
+    }
+    if (copyOfInputArray[0] == "-") copyOfInputArray = ["0", ...copyOfInputArray];
+    while (copyOfInputArray.length > 0){
+        curr = copyOfInputArray.pop();
+        if (prev === "(") {
+            if (curr === ")" || numbers.includes(curr) || constants.includes(curr)) parsedInput1stInteration.push("×"); else {}
+        } else if (curr === ")") {
+            if (numbers.includes(prev) || functions.includes(prev) || constants.includes(prev)) parsedInput1stInteration.push("×"); else {}
+        }
+        else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stInteration.push("×"); else {}
+        parsedInput1stInteration.push(curr);
+        prev = curr;
+    }
+
+
+    parsedInput1stInteration = parsedInput1stInteration.reverse();
+
+    let parsedInput2ndInteration = []
+    while (parsedInput1stInteration.length > 0){
+        curr = parsedInput1stInteration.pop();
+        if (curr === "!"){
+            parsedInput2ndInteration.push(")")
+            curr = parsedInput1stInteration.pop();
+            while (parsedInput1stInteration.length > 0 && !operators.includes(curr) && curr!="#"){
+                parsedInput2ndInteration.push(curr);
+                curr = parsedInput1stInteration.pop();
+            }
+            if (parsedInput1stInteration.length === 0) {
+                parsedInput2ndInteration = [...parsedInput2ndInteration, curr, "(", "fact" ];
+            }
+            else parsedInput2ndInteration = [...parsedInput2ndInteration, "(", "fact", curr];
+        }
+        else {
+            parsedInput2ndInteration.push(curr);
+        }
+    }
+
+    parsedInput2ndInteration = parsedInput2ndInteration.reverse();
+
+    let parsedInput3rdInteration = []
+    while (parsedInput2ndInteration.length > 0){
+        curr = parsedInput2ndInteration.pop();
+        if (curr === "^" || curr === "√"){
+            let word;
+            if (curr === "^") word = "pow"; else word = "root";
+            let temp = [];
+            if (parsedInput3rdInteration.length > 0) curr = parsedInput3rdInteration.pop();
+            while (parsedInput3rdInteration.length > 0 && !operators.includes(curr) && curr!="#"){
+                temp.push(curr);
+                curr = parsedInput3rdInteration.pop();
+            }
+            temp.push(curr);
+            temp = temp.reverse();
+            parsedInput3rdInteration.push(")")
+            while (temp.length > 0){
+                curr = temp.pop();
+                parsedInput3rdInteration.push(curr);
+            }
+            parsedInput3rdInteration.push(",");
+            curr = parsedInput2ndInteration.pop();
+
+            while (parsedInput2ndInteration.length > 0 && !operators.includes(curr) && curr!="#"){
+                parsedInput3rdInteration.push(curr)
+                curr = parsedInput2ndInteration.pop();
+            }
+            if (parsedInput2ndInteration.length === 0) {
+                parsedInput3rdInteration = [...parsedInput3rdInteration, curr, "(", word ];
+            }
+            else parsedInput3rdInteration = [...parsedInput3rdInteration, "(", word, curr];
+        }
+        
+        else {
+            parsedInput3rdInteration.push(curr);
+        }
+    }
+
+    parsedInput3rdInteration = parsedInput3rdInteration.reverse().filter(x => x!="#");
+
+    let result = calculate(parsedInput3rdInteration);
+
+    answer = result;
+
+    
+    document.getElementById('display').value = displaycopyOfInputArray(" = "+result);
 }
-else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stInteration.push("×"); else {}

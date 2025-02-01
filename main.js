@@ -3,24 +3,31 @@ let inputArray = [];
 const invalidAdjacentSymbol1stPos = ["(", ".", "+", "-", "×", "÷", ",", "!", "^", "√"];
 const operators = ["!", "^", "+", "-", "×", "÷", "√"]
 const invalidAdjacentSymbol2ndPos = [".", "+", "-", "×", "÷", ")", "!", "^", "√"];
-const functions = ["cos", "sin", "ln", "tan", "log", "inv", "fact", "pow", "root"];
-const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
+const functions = ["cos", "sin", "ln", "tan", "log", "inv", "fact", "pow", "root", "abs"];
+const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 const constants = ["e", "Ans", "π"]
 let answer = 0;
+let preAnswer = 0;
 let bracketOpened = 0;
 let inRadians = false;
 let typeOfFunction = []
 let recoveredFunctions = []
 
-let isFloat = []
+let isFloat = false;
 let isNumber = false;
+
+let afterOperationWord = "solved";
 
 
 function buttonClicked(input){
     let length = inputArray.length;
     let prevInput = inputArray[length -1];
-    if (inputArray.length === 0 && (operators.includes(input) && input != "-")) return; else;
-    if (invalidAdjacentSymbol2ndPos.includes(input) && invalidAdjacentSymbol1stPos.includes(prevInput)) {
+    if (inputArray.length === 0 && (operators.includes(input) && input != "-")) return; 
+    else if (inputArray[inputArray.length - 1] === afterOperationWord) {
+        clearInput(input);
+        return;
+    }
+    else if (invalidAdjacentSymbol2ndPos.includes(input) && invalidAdjacentSymbol1stPos.includes(prevInput)) {
         const validCombinations = [
             [",", "("], [")", ","], ["^", "("], [")", "^"],
             ["!", "("], [")", "!"], ["√", "("], [")", "√"],
@@ -30,12 +37,10 @@ function buttonClicked(input){
         const isValid = validCombinations.some(([prev, curr]) => prevInput === prev && input === curr);
     
         if (!isValid) return;
-    } else;
-
-    if (input === ")"){
+    } 
+    else if (input === ")"){
         if (bracketOpened < 1) return; else {}
-        if (typeOfFunction[typeOfFunction.length -1] === 2) return; else {}
-        if (recoveredFunctions[recoveredFunctions.length -1] < 2) recoveredFunctions.push(typeOfFunction[typeOfFunction.length -1]);
+        recoveredFunctions.push(typeOfFunction[typeOfFunction.length -1]);
         typeOfFunction.pop(); 
         bracketOpened--;
     }
@@ -43,38 +48,40 @@ function buttonClicked(input){
         bracketOpened++;
         typeOfFunction.push(0);
     }
-
-    else if (input === ",") {
-        if (typeOfFunction.length < 1) return; else {}
-        if (typeOfFunction[typeOfFunction.length -1] <= 1) return; else {}
-        typeOfFunction[typeOfFunction.length -1]--;
-        recoveredFunctions.push(2);
+    else if (input === "Pre") input += "Ans";
+    else if (input === "."){
+        if (isFloat) return;
+        if (inputArray.length < 1) inputArray.push("0");
+        isFloat = true;
+    } 
+    else if (numbers.includes(input)){}
+    else {
+        isFloat = false;
     }
-
-    // if (!numbers.includes(input)) {
-    //     isFloat = false;
-    // }
-
-    // if (input == "." && isFloat) return; else {} 
-    // else if (input == ".") isFloat = true;
 
     inputArray.push(input);
 
     if (functions.includes(input)){
         typeOfFunction.push(1);
-        inputArray.push("(");
+        inputArray.push("(", "#");
         bracketOpened++;
     }
     
-    document.getElementById('display').value = inputArray.join("");
+    displayInputArray();
 }
 
-function clearInput(){
+function displayInputArray(extraString){
+    if (extraString == undefined) extraString = ""
+    document.getElementById('display').value = inputArray.filter((x) => x != '#').join("") + extraString;
+}
+
+function clearInput(input){
     inputArray = [];
     bracketOpened = 0;
     typeOfFunction = [];
     recoveredFunctions = [];
-    document.getElementById('display').value = 0;
+    if (!input) input = 0;
+    document.getElementById('display').value = input;
     isFloat = false;
 }
 
@@ -86,33 +93,82 @@ function backSpace(){
 
     let length = inputArray.length;
 
-    if (inputArray[length -1] === ".") isFloat = false;
-    if (length>1 && functions.includes(inputArray[length -2])) {
+    let curr = inputArray[length -1];
+    let prev;
+    if (length>1) prev = inputArray[length -2];
+
+    if (curr === ".") isFloat = false;
+    if (prev && prev === ".") isFloat = true;
+    if (prev && functions.includes(prev)) {
         inputArray.pop();
         bracketOpened--;
     }
-    else if (inputArray[length -1] === ")"){
+    else if (curr === ")"){
         bracketOpened++;
-        if (recoveredFunctions[recoveredFunctions.length -1] < 2) {
-            typeOfFunction.push(recoveredFunctions[recoveredFunctions.length -1]);
-            recoveredFunctions.pop();
-        }
-        else {
-            recoveredFunctions[recoveredFunctions.length -1]--;
-            typeOfFunction.push(1);
-        }
+        typeOfFunction.push(recoveredFunctions[recoveredFunctions.length -1]);
+        recoveredFunctions.pop();
     }
     else if (inputArray[length -1] === "(") {
         bracketOpened--;
         typeOfFunction.pop();
     }
-    else if (inputArray[length -1] === ","){
-        typeOfFunction[typeOfFunction.length -1]++;
-        recoveredFunctions.pop();
-    }
+
     inputArray.pop();
     if (inputArray.length < 1) document.getElementById('display').value = 0;
-    else document.getElementById('display').value = inputArray.join("");
+    else displayInputArray();
+}
+
+
+function solve(parsedArray) {
+    let stack = []; 
+    for (let i = 0; i < parsedArray.length; i++) {
+        const element = parsedArray[i];
+        if (typeof element === 'number') {
+            stack.push(element);
+        } else if (Array.isArray(element)) {
+            const [func, argCount, isOperator] = element;
+
+            if (argCount === 1) {
+                let result = partitionArray(parsedArray, ++i);
+                i = result[1];
+                let lookahead = solve(result[0]);
+                stack.push(func(lookahead));
+            } else if (argCount === 2 && !isOperator) {
+                let result = partitionArray(parsedArray, ++i);
+                i = result[1];
+                let lookahead1 = solve(result[0]);
+                result = partitionArray(parsedArray, ++i);
+                i = result[1];
+                let lookahead2 = solve(result[0]);
+                stack.push(func(lookahead1, lookahead2));
+            }
+            else {
+                let lookahead = parsedArray[++i];
+                stack.push(element);
+
+                if (typeof lookahead == 'number'){
+                    stack.push(lookahead);
+                }
+                else if (lookahead === "("){
+                    let result = partitionArray(parsedArray, i);
+                    i = result[1];
+                    let lookahead = solve(result[0]);
+                    stack.push(lookahead);
+                }
+                else if (Array.isArray(element)){
+                    i--;
+                }
+            }
+        }
+        else if (element === "("){
+            let result = partitionArray(parsedArray, i);
+            i = result[1];
+            let lookahead = solve(result[0].slice(1, result[0].length - 1));
+            stack.push(lookahead);
+        }
+    }
+
+    return evaluate(stack);
 }
 
 function partitionArray(parsedArray, i){
@@ -176,100 +232,46 @@ function evaluate(stack) {
 }
 
 
-
-
-
-function solve(parsedArray) {
-    let stack = []; 
-    for (let i = 0; i < parsedArray.length; i++) {
-        const element = parsedArray[i];
-        if (typeof element === 'number') {
-            stack.push(element);
-        } else if (Array.isArray(element)) {
-            const [func, argCount, isOperator] = element;
-
-            if (argCount === 1) {
-                let result = partitionArray(parsedArray, ++i);
-                i = result[1];
-                let lookahead = solve(result[0]);
-                stack.push(func(lookahead));
-            } else if (argCount === 2 && !isOperator) {
-                let result = partitionArray(parsedArray, ++i);
-                i = result[1];
-                let lookahead1 = solve(result[0]);
-                result = partitionArray(parsedArray, ++i);
-                i = result[1];
-                let lookahead2 = solve(result[0]);
-                stack.push(func(lookahead1, lookahead2));
-            }
-            else {
-                let lookahead = parsedArray[++i];
-                stack.push(element);
-
-                if (typeof lookahead == 'number'){
-                    stack.push(lookahead);
-                }
-                else if (lookahead === "("){
-                    let result = partitionArray(parsedArray, i);
-                    i = result[1];
-                    let lookahead = solve(result[0]);
-                    stack.push(lookahead);
-                }
-                else if (Array.isArray(element)){
-                    i--;
-                }
-            }
-        }
-        else if (element === "("){
-            let result = partitionArray(parsedArray, i);
-            i = result[1];
-            let lookahead = solve(result[0].slice(1, result[0].length - 1));
-            stack.push(lookahead);
-        }
-    }
-
-
-    return evaluate(stack);
-}
-
 function parse(){
+    while (bracketOpened > 0) {
+        inputArray.push(")");
+        bracketOpened--;
+    }
     let copyOfInputArray = [...inputArray];
     let parsedInput1stInteration = []
     let curr, prev;
 
-    if (inputArray.length === 0) {
+    if (copyOfInputArray.length === 0) {
         document.getElementById('display').value = result;
         return;
     }
-    if (inputArray[0] == "-") inputArray = ["0", ...inputArray];
-    while (inputArray.length > 0){
-        curr = inputArray.pop();
+    if (copyOfInputArray[0] == "-") copyOfInputArray = ["0", ...copyOfInputArray];
+    while (copyOfInputArray.length > 0){
+        curr = copyOfInputArray.pop();
         if (prev === "(") {
             if (curr === ")" || numbers.includes(curr) || constants.includes(curr)) parsedInput1stInteration.push("×"); else {}
         } else if (curr === ")") {
             if (numbers.includes(prev) || functions.includes(prev) || constants.includes(prev)) parsedInput1stInteration.push("×"); else {}
         }
-        else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stInteration.push("×"); else {}
+        else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stInteration.push("×"); 
+        else if (prev === "-" && curr === "#") parsedInput1stInteration.push("0");
+        else {}
         parsedInput1stInteration.push(curr);
         prev = curr;
     }
 
 
     parsedInput1stInteration = parsedInput1stInteration.reverse();
-    console.log(parsedInput1stInteration);
 
     let parsedInput2ndInteration = []
-    let bracketOpened = 0;
     while (parsedInput1stInteration.length > 0){
         curr = parsedInput1stInteration.pop();
         if (curr === "!"){
             parsedInput2ndInteration.push(")")
             curr = parsedInput1stInteration.pop();
-            while (parsedInput1stInteration.length > 0 && !operators.includes(curr) &&!functions.includes(curr)){
+            while (parsedInput1stInteration.length > 0 && !operators.includes(curr) && curr!="#"){
                 parsedInput2ndInteration.push(curr);
                 curr = parsedInput1stInteration.pop();
-                if (curr === "(") bracketOpened++
-                else if (curr === ")") bracketOpened--;
             }
             if (parsedInput1stInteration.length === 0) {
                 parsedInput2ndInteration = [...parsedInput2ndInteration, curr, "(", "fact" ];
@@ -283,8 +285,6 @@ function parse(){
 
     parsedInput2ndInteration = parsedInput2ndInteration.reverse();
 
-    console.log(parsedInput2ndInteration);
-
     let parsedInput3rdInteration = []
     while (parsedInput2ndInteration.length > 0){
         curr = parsedInput2ndInteration.pop();
@@ -293,7 +293,7 @@ function parse(){
             if (curr === "^") word = "pow"; else word = "root";
             let temp = [];
             if (parsedInput3rdInteration.length > 0) curr = parsedInput3rdInteration.pop();
-            while (parsedInput3rdInteration.length > 0 && !operators.includes(curr)){
+            while (parsedInput3rdInteration.length > 0 && !operators.includes(curr) && curr!="#"){
                 temp.push(curr);
                 curr = parsedInput3rdInteration.pop();
             }
@@ -307,12 +307,9 @@ function parse(){
             parsedInput3rdInteration.push(",");
             curr = parsedInput2ndInteration.pop();
 
-            let bracketOpened = 0;
-            while (parsedInput2ndInteration.length > 0 && !operators.includes(curr) && (curr!="(" || bracketOpened>0)){
+            while (parsedInput2ndInteration.length > 0 && !operators.includes(curr) && curr!="#"){
                 parsedInput3rdInteration.push(curr)
                 curr = parsedInput2ndInteration.pop();
-                if (curr === "(") bracketOpened++
-                else if (curr === ")") bracketOpened--;
             }
             if (parsedInput2ndInteration.length === 0) {
                 parsedInput3rdInteration = [...parsedInput3rdInteration, curr, "(", word ];
@@ -325,15 +322,17 @@ function parse(){
         }
     }
 
-    parsedInput3rdInteration = parsedInput3rdInteration.reverse();
-    console.log(parsedInput3rdInteration);
+    parsedInput3rdInteration = parsedInput3rdInteration.reverse().filter(x => x!="#");
 
     let result = calculate(parsedInput3rdInteration);
 
+    preAnswer = answer;
     answer = result;
 
     
-    document.getElementById('display').value = copyOfInputArray.join("") +" = "+result;
+    displayInputArray(" = "+result);
+
+    inputArray.push(afterOperationWord);
 }
 
 function calculate(parsedInput) {
@@ -341,7 +340,7 @@ function calculate(parsedInput) {
     let number = "";
 
     for (const i of parsedInput) {
-        if (numbers.includes(i)) {
+        if (numbers.includes(i) || i === ".") {
             number += i;
             continue;
         } else {
@@ -360,8 +359,10 @@ function calculate(parsedInput) {
         else if (i === "fact") parsedArray.push([factorial, 1, false]);
         else if (i === "root") parsedArray.push([nthRoot, 2, false]);
         else if (i === "inv") parsedArray.push([inverse, 2, false]);
+        else if (i === "abs") parsedArray.push([Math.abs, 1, false]);
         else if (i === "π") parsedArray.push(Math.PI);
         else if (i === "Ans") parsedArray.push(answer);
+        else if (i === "PreAns") parsedArray.push(preAnswer);
         else if (i === "e") parsedArray.push(Math.E); 
         else if (i === "+") parsedArray.push([sum, 2, true]);
         else if (i === "-") parsedArray.push([difference, 2, true]);

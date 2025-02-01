@@ -12,50 +12,52 @@
         
         <input type="text" id="display" value="0" readonly />
         <div class="btn special" id="mode-toggle"> 
-            <button class="no-background ">Rad</button> | <button class="no-background disabled">Deg</button> 
+            <button class="no-background">Rad</button> | <button class="no-background disabled">Deg</button> 
         </div>
-        <button class="btn special"></button>
-        <button class="btn special" onclick="buttonClicked('(')">(</button>
-        <button class="btn special" onclick="buttonClicked(')')">)</button>
-    
-        <button class="btn special" onclick="buttonClicked('inv')">inv</button>
-        <button class="btn" onclick="buttonClicked('sin')">sin</button>
-        <button class="btn" onclick="buttonClicked('ln')">ln</button>
-        <button class="btn" onclick="buttonClicked('7')">7</button>
-        <button class="btn" onclick="buttonClicked('8')">8</button>
-        <button class="btn" onclick="buttonClicked('9')">9</button>
-    
-        <button class="btn special" onclick="buttonClicked('π')">π</button>
-        <button class="btn" onclick="buttonClicked('cos')">cos</button>
-        <button class="btn" onclick="buttonClicked('log')">log</button>
-        <button class="btn" onclick="buttonClicked('4')">4</button>
-        <button class="btn" onclick="buttonClicked('5')">5</button>
-        <button class="btn" onclick="buttonClicked('6')">6</button>
-    
-        <button class="btn special" onclick="buttonClicked('e')">e</button>
-        <button class="btn" onclick="buttonClicked('tan')">tan</button>
-        <button class="btn" onclick="buttonClicked('!')">x!</button>
-        <button class="btn" onclick="buttonClicked('1')">1</button>
-        <button class="btn" onclick="buttonClicked('2')">2</button>
-        <button class="btn" onclick="buttonClicked('3')">3</button>
-    
-        <button class="btn special" onclick="buttonClicked('Ans')">Ans</button>
-        <button class="btn" onclick="buttonClicked('^')">x<sup>n</sup></button>
-        <button class="btn" onclick="buttonClicked('√')"><sup>n</sup>√x</button>
-        <button class="btn" onclick="buttonClicked('0')">0</button>
-        <button class="btn" onclick="buttonClicked('.')">.</button>
-        <button class="btn" onclick="backSpace()">⌫</button>
+        <button class="btn special" parameter="(">(</button>
+        <button class="btn special" parameter=")">)</button>
+        <button class="btn special" parameter="abs">abs</button>
 
-        <button class="btn special" onclick="clearInput()">AC</button>
+        <button class="btn special" parameter="inv">inv</button>
+        <button class="btn" parameter="sin">sin</button>
+        <button class="btn" parameter="ln">ln</button>
+        <button class="btn" parameter="7">7</button>
+        <button class="btn" parameter="8">8</button>
+        <button class="btn" parameter="9">9</button>
 
-        <button class="btn special" onclick="buttonClicked('+')">+</button>
-        <button class="btn special" onclick="buttonClicked('-')">-</button>
-        <button class="btn special" onclick="buttonClicked('×')">×</button>
-        <button class="btn special" onclick="buttonClicked('÷')">÷</button>
-        <button class="btn equal" onclick="parse()">=</button>
-        <button class="btn equal">%</button>
+        <button class="btn special" parameter="π">π</button>
+        <button class="btn" parameter="cos">cos</button>
+        <button class="btn" parameter="log">log</button>
+        <button class="btn" parameter="4">4</button>
+        <button class="btn" parameter="5">5</button>
+        <button class="btn" parameter="6">6</button>
+
+        <button class="btn special" parameter="e">e</button>
+        <button class="btn" parameter="tan">tan</button>
+        <button class="btn" parameter="!">x!</button>
+        <button class="btn" parameter="1">1</button>
+        <button class="btn" parameter="2">2</button>
+        <button class="btn" parameter="3">3</button>
+
+        <button class="btn special" parameter="Pre">Pre</button>
+        <button class="btn" parameter="^">x<sup>n</sup></button>
+        <button class="btn" parameter="√"><sup>n</sup>√x</button>
+        <button class="btn" parameter="0">0</button>
+        <button class="btn" parameter=".">.</button>
+        <button class="btn" parameter="⌫">⌫</button>
+
+        <button class="btn special" parameter="Ans">Ans</button>
+
+        <button class="btn special" parameter="+">+</button>
+        <button class="btn special" parameter="-">-</button>
+        <button class="btn special" parameter="×">×</button>
+        <button class="btn special" parameter="÷">÷</button>
+        <button class="btn equal" parameter="=">=</button>
+        <button class="btn equal" parameter="AC">AC</button>
+
         
     </div>
+    <script src="onclickFunctions.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
