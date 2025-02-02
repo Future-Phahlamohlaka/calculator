@@ -14,3 +14,9 @@ buttons.forEach(button => {
     }
   });
 });
+
+const modeToggleElement = document.getElementById('mode-toggle');
+
+if (modeToggle) modeToggleElement.addEventListener('click', () => {
+  modeToggle();
+})

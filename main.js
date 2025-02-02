@@ -9,7 +9,7 @@ const constants = ["e", "Ans", "π"]
 let answer = 0;
 let preAnswer = 0;
 let bracketOpened = 0;
-let inRadians = false;
+let inRadians = true;
 let typeOfFunction = []
 let recoveredFunctions = []
 
@@ -17,16 +17,32 @@ let isFloat = false;
 let isNumber = false;
 
 let afterOperationWord = "solved";
+let bracketOpenedForFunction = false;
+
+function modeToggle(){
+    inRadians = !inRadians;
+    const buttons = document.querySelectorAll('.no-background');
+    if (inRadians){
+        buttons[1].classList.add("disabled");
+        buttons[0].classList.remove("disabled");
+    }
+    else {
+        buttons[0].classList.add("disabled");
+        buttons[1].classList.remove("disabled");
+    }
+}
 
 
 function buttonClicked(input){
     let length = inputArray.length;
     let prevInput = inputArray[length -1];
-    if (inputArray.length === 0 && (operators.includes(input) && input != "-")) return; 
-    else if (inputArray[inputArray.length - 1] === afterOperationWord) {
+    if (inputArray[inputArray.length - 1] === afterOperationWord) {
         clearInput(input);
-        return;
+        afterOperationWord = "";
     }
+    if (inputArray.length === 0 && (operators.includes(input) && input != "-")) return; 
+    
+    if (input === "Pre") input += "Ans";
     else if (invalidAdjacentSymbol2ndPos.includes(input) && invalidAdjacentSymbol1stPos.includes(prevInput)) {
         const validCombinations = [
             [",", "("], [")", ","], ["^", "("], [")", "^"],
@@ -38,17 +54,19 @@ function buttonClicked(input){
     
         if (!isValid) return;
     } 
-    else if (input === ")"){
+    
+    if (input === ")"){
         if (bracketOpened < 1) return; else {}
         recoveredFunctions.push(typeOfFunction[typeOfFunction.length -1]);
         typeOfFunction.pop(); 
         bracketOpened--;
-    }
-    else if (input === "("){
+        if (bracketOpenedForFunction) input = "}";
+
+    } else if (input === "("){
         bracketOpened++;
         typeOfFunction.push(0);
+        bracketOpenedForFunction = false;
     }
-    else if (input === "Pre") input += "Ans";
     else if (input === "."){
         if (isFloat) return;
         if (inputArray.length < 1) inputArray.push("0");
@@ -63,8 +81,9 @@ function buttonClicked(input){
 
     if (functions.includes(input)){
         typeOfFunction.push(1);
-        inputArray.push("(", "#");
+        inputArray.push("{");
         bracketOpened++;
+        bracketOpenedForFunction = true;
     }
     
     displayInputArray();
@@ -72,7 +91,11 @@ function buttonClicked(input){
 
 function displayInputArray(extraString){
     if (extraString == undefined) extraString = ""
-    document.getElementById('display').value = inputArray.filter((x) => x != '#').join("") + extraString;
+    document.getElementById('display').value = inputArray.map(x => {
+        if (x === "{") return "(";
+        else if (x === "}") return ")";
+        else return x;
+    }).join("") + extraString;
 }
 
 function clearInput(input){
@@ -233,98 +256,163 @@ function evaluate(stack) {
 
 
 function parse(){
-    while (bracketOpened > 0) {
-        inputArray.push(")");
-        bracketOpened--;
+    if (bracketOpened > 0) {
+        return;
     }
     let copyOfInputArray = [...inputArray];
-    let parsedInput1stInteration = []
+    let parsedInput1stIteration = []
     let curr, prev;
 
     if (copyOfInputArray.length === 0) {
-        document.getElementById('display').value = result;
+        document.getElementById('display').value = 0;
         return;
     }
     if (copyOfInputArray[0] == "-") copyOfInputArray = ["0", ...copyOfInputArray];
     while (copyOfInputArray.length > 0){
+        prev = curr;
         curr = copyOfInputArray.pop();
         if (prev === "(") {
-            if (curr === ")" || numbers.includes(curr) || constants.includes(curr)) parsedInput1stInteration.push("×"); else {}
+            if (curr === ")" || numbers.includes(curr) || constants.includes(curr)) parsedInput1stIteration.push("×"); else {}
         } else if (curr === ")") {
-            if (numbers.includes(prev) || functions.includes(prev) || constants.includes(prev)) parsedInput1stInteration.push("×"); else {}
+            if (numbers.includes(prev) || functions.includes(prev) || constants.includes(prev)) parsedInput1stIteration.push("×"); else {}
         }
-        else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stInteration.push("×"); 
-        else if (prev === "-" && curr === "#") parsedInput1stInteration.push("0");
+        else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stIteration.push("×"); 
+        else if (prev === "-" && curr === "#") parsedInput1stIteration.push("0");
         else {}
-        parsedInput1stInteration.push(curr);
-        prev = curr;
+        parsedInput1stIteration.push(curr);
     }
 
 
-    parsedInput1stInteration = parsedInput1stInteration.reverse();
+    parsedInput1stIteration = parsedInput1stIteration.reverse();
 
-    let parsedInput2ndInteration = []
-    while (parsedInput1stInteration.length > 0){
-        curr = parsedInput1stInteration.pop();
+    let parsedInput2ndIteration = []
+    prev, curr = null;
+    while (parsedInput1stIteration.length > 0){
+        curr = parsedInput1stIteration.pop();
         if (curr === "!"){
-            parsedInput2ndInteration.push(")")
-            curr = parsedInput1stInteration.pop();
-            while (parsedInput1stInteration.length > 0 && !operators.includes(curr) && curr!="#"){
-                parsedInput2ndInteration.push(curr);
-                curr = parsedInput1stInteration.pop();
+            parsedInput2ndIteration.push("}")
+            prev = curr;
+            curr = parsedInput1stIteration.pop();
+            let nestedFactorials = 0;
+            while (parsedInput1stIteration.length > 0) {
+                if (
+                    (operators.includes(curr) && !(prev === "!" && curr === prev)) || 
+                    curr === "{"
+                ) {
+                    break;
+                }
+            
+                if (curr === "!") {
+                    nestedFactorials++;
+                } else {
+                    parsedInput2ndIteration.push(curr);
+                }
+            
+                prev = curr;
+                curr = parsedInput1stIteration.pop();
             }
-            if (parsedInput1stInteration.length === 0) {
-                parsedInput2ndInteration = [...parsedInput2ndInteration, curr, "(", "fact" ];
+                        
+            if (parsedInput1stIteration.length === 0) {
+                parsedInput2ndIteration = [...parsedInput2ndIteration, curr, "{", "fact" ];
             }
-            else parsedInput2ndInteration = [...parsedInput2ndInteration, "(", "fact", curr];
+            else parsedInput2ndIteration = [...parsedInput2ndIteration, "{", "fact", curr];
+
+            while(nestedFactorials > 0){
+                parsedInput2ndIteration = ["}", ...parsedInput2ndIteration, "{", "fact"];
+                nestedFactorials--;
+            }
+
         }
         else {
-            parsedInput2ndInteration.push(curr);
+            parsedInput2ndIteration.push(curr);
         }
+
     }
 
-    parsedInput2ndInteration = parsedInput2ndInteration.reverse();
+    parsedInput2ndIteration = parsedInput2ndIteration.reverse();
 
-    let parsedInput3rdInteration = []
-    while (parsedInput2ndInteration.length > 0){
-        curr = parsedInput2ndInteration.pop();
+
+    let parsedInput3rdIteration = []
+    prev, curr, prevprev = null;
+    while (parsedInput2ndIteration.length > 0){
+        prevprev = prev;
+        prev = curr;
+        curr = parsedInput2ndIteration.pop();
         if (curr === "^" || curr === "√"){
             let word;
             if (curr === "^") word = "pow"; else word = "root";
             let temp = [];
-            if (parsedInput3rdInteration.length > 0) curr = parsedInput3rdInteration.pop();
-            while (parsedInput3rdInteration.length > 0 && !operators.includes(curr) && curr!="#"){
+            if (parsedInput3rdIteration.length > 0) {
+                prevprev = prev;
+                prev = curr;
+                curr = parsedInput3rdIteration.pop();
+            }
+            let openBrackets = 1;
+            while (parsedInput3rdIteration.length > 0 && !operators.includes(curr) && openBrackets > 0){
                 temp.push(curr);
-                curr = parsedInput3rdInteration.pop();
+                if (curr === "{") openBrackets ++;
+                else if (curr === "}") openBrackets--;
+                curr = parsedInput3rdIteration.pop();
             }
             temp.push(curr);
-            temp = temp.reverse();
-            parsedInput3rdInteration.push(")")
+            parsedInput3rdIteration.push("}")
             while (temp.length > 0){
                 curr = temp.pop();
-                parsedInput3rdInteration.push(curr);
+                parsedInput3rdIteration.push(curr);
             }
-            parsedInput3rdInteration.push(",");
-            curr = parsedInput2ndInteration.pop();
+            parsedInput3rdIteration.push(",");
+            curr = parsedInput2ndIteration.pop();
 
-            while (parsedInput2ndInteration.length > 0 && !operators.includes(curr) && curr!="#"){
-                parsedInput3rdInteration.push(curr)
-                curr = parsedInput2ndInteration.pop();
+            let nestedRoots = 0;
+            while (parsedInput2ndIteration.length > 0) {
+                if (
+                    (operators.includes(curr) && !(prev === "√" && curr === prev)) || 
+                    curr === "{"
+                ) {
+                    break;
+                }
+            
+                if (curr === "√") {
+                    nestedRoots++;
+                } else {
+                    parsedInput3rdIteration.push(curr);
+                }
+            
+                prevprev;
+                prev = curr;
+                curr = parsedInput2ndIteration.pop();
             }
-            if (parsedInput2ndInteration.length === 0) {
-                parsedInput3rdInteration = [...parsedInput3rdInteration, curr, "(", word ];
+
+            if (parsedInput2ndIteration.length === 0) {
+                parsedInput3rdIteration = [...parsedInput3rdIteration, curr, "{", word ];
             }
-            else parsedInput3rdInteration = [...parsedInput3rdInteration, "(", word, curr];
+            else {
+                parsedInput3rdIteration = [...parsedInput3rdIteration, "{", word];
+                parsedInput2ndIteration.push(curr);
+            }
+
+            while(nestedRoots > 0){
+                parsedInput3rdIteration = ["}", ...parsedInput3rdIteration, "{", "root"];
+                nestedRoots--;
+                curr = prevprev;
+            }
+
         }
         
         else {
-            parsedInput3rdInteration.push(curr);
+            parsedInput3rdIteration.push(curr);
         }
     }
 
-    parsedInput3rdInteration = parsedInput3rdInteration.reverse().filter(x => x!="#");
+    parsedInput3rdIteration = parsedInput3rdIteration.reverse().map(x => {
+        if (x === "{") return "(";
+        else if (x === "}") return ")";
+        else return x;
+    });
+    
+    console.log(parsedInput3rdIteration.join(""))
 
-    let result = calculate(parsedInput3rdInteration);
+    let result = calculate(parsedInput3rdIteration);
 
     preAnswer = answer;
     answer = result;
@@ -350,9 +438,9 @@ function calculate(parsedInput) {
             }
         }
 
-        if (i === "sin") parsedArray.push([Math.sin, 1, false]);
-        else if (i === "cos") parsedArray.push([Math.cos, 1, false]);
-        else if (i === "tan") parsedArray.push([Math.tan, 1, false]);
+        if (i === "sin") parsedArray.push([sin, 1, false]);
+        else if (i === "cos") parsedArray.push([cos, 1, false]);
+        else if (i === "tan") parsedArray.push([tan, 1, false]);
         else if (i === "pow") parsedArray.push([Math.pow, 2, false]);
         else if (i === "log") parsedArray.push([Math.log10, 1, false]);
         else if (i === "ln") parsedArray.push([Math.log, 1, false]);
@@ -421,4 +509,20 @@ function factorial(n) {
 
 function nthRoot(x, n) {
     return Math.pow(n, 1 / x);
+}
+
+function cos(n){
+    if (!inRadians) n = n/180*Math.PI;
+    console.log(n);
+    return Math.cos(n);
+}
+
+function sin(n){
+    if (!inRadians) n = n/180*Math.PI;
+    return Math.sin(n);
+}
+
+function tan(n){
+    if (!inRadians) n = n/180*Math.PI;
+    return Math.tan(n);
 }
