@@ -47,7 +47,7 @@ function buttonClicked(input){
         const validCombinations = [
             [",", "("], [")", ","], ["^", "("], [")", "^"],
             ["!", "("], [")", "!"], ["√", "("], [")", "√"],
-            ["!", "!"], ["√", "√"], ["!", ")"]
+            ["!", "!"], ["√", "√"], ["!", ")"], ["×", "-"]
         ];
     
         const isValid = validCombinations.some(([prev, curr]) => prevInput === prev && input === curr);
@@ -277,7 +277,8 @@ function parse(){
             if (numbers.includes(prev) || functions.includes(prev) || constants.includes(prev)) parsedInput1stIteration.push("×"); else {}
         }
         else if ((constants.includes(prev) || functions.includes(prev)) && numbers.includes(curr)) parsedInput1stIteration.push("×"); 
-        else if (prev === "-" && curr === "#") parsedInput1stIteration.push("0");
+        else if (prev === "-" && curr === "#") parsedInput1stIteration.push("0"); 
+        else if (prev === "-" && curr === "×") parsedInput1stIteration.push("0");
         else {}
         parsedInput1stIteration.push(curr);
     }
