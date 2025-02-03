@@ -411,7 +411,7 @@ function parse(){
         else return x;
     });
     
-    console.log(parsedInput3rdIteration.join(""))
+    // console.log(parsedInput3rdIteration.join(""))
 
     let result = calculate(parsedInput3rdIteration);
 
@@ -514,7 +514,7 @@ function nthRoot(x, n) {
 
 function cos(n){
     if (!inRadians) n = n/180*Math.PI;
-    console.log(n);
+    // console.log(n);
     return Math.cos(n);
 }
 
